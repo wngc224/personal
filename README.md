@@ -54,7 +54,7 @@ cursor .
 | ドキュメント | 内容 | 対象読者 |
 |-------------|------|----------|
 | [**運用定義書**](docs/ops_manual.md) | CCPサイクル詳細、KPI、バックアップ手順、自動化設定 | 全運用メンバー |
-| `knowledge-vault/README.md` | Vault内の詳細説明 | Obsidian利用者 |
+| [**Vault内README**](knowledge-vault/README.md) | Obsidian起動方法、プラグイン設定、日常チェック | Obsidian利用者 |
 
 ### 主要KPI目標
 - 📊 **週間キャプチャ**: 35件以上（日平均5件）
