@@ -113,6 +113,8 @@ SORT file.mtime desc
 ## 📝 開発者向け情報
 
 - **Markdown Lint**: コード品質維持のため、将来的に `markdown-lint.yml` を導入予定
+  - ルール詳細は [.markdownlint.yml](.markdownlint.yml) を参照（作成時）
+  - 行長120文字、Front-Matter必須などの独自ルールを設定予定
 - **Conventional Commits**: コミットメッセージは `feat:`, `fix:`, `docs:` 等の規約に準拠
 - **Git運用**: 詳細は [運用定義書](docs/ops_manual.md) の「3.3 Git運用」を参照
 

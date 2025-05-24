@@ -60,7 +60,7 @@
 | --------- | ----------------------- | -------- | ----------- | ----------------------------- |
 | Core      | Templates / Daily Notes | テンプレ／日次  | Obsidian 標準 |                               |
 | Community | Dataview                | 動的クエリ    | `>= 0.5.63` | JS Queries 有効化必須              |
-|           | QuickAdd                | 高速キャプチャ  | `>= 0.9.8`  | Macro "Capture → 00_Capture" |
+|           | QuickAdd                | 高速キャプチャ  | `>= 0.9.8`  | Macro `Capture → 00_Capture` 設定必須 |
 |           | Templater               | 高度テンプレ   | `>= 1.17`   | frontmatter 自動挿入              |
 |           | Periodic Notes          | 日次/週次ノート | `>= 0.8.0`  | Daily Note 00:00 JST          |
 
@@ -206,7 +206,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '0 15 * * *'  # 毎日24:00 JST
+    - cron: '0 15 * * *'  # 毎日15:00 UTC（= 24:00 JST）
 
 jobs:
   backup:
@@ -675,11 +675,48 @@ dv.paragraph(`**今週のPermanent: ${cnt} 件**`);
 
 ---
 
-> **本書の更新方法**
->
-> 1. canmore 上で修正 → `git add docs/ops_manual.md`
-> 2. `docs:` コミットメッセージで push → Review → Merge
+## 変更履歴
+
+| バージョン | 更新日 | 主要変更内容 |
+|----------|-------|-------------|
+| v1.0 | 2025-05-25 | 初版作成（ChatGPT o3による運用定義書ドラフト） |
+| v1.1 | 2025-05-25 | 構造最適化・Git統一リポジトリ化・メタ情報修正 |
+| v1.2 | 2025-05-25 | **詳細Git運用ガイド追加**・**モバイル運用（スマホでCCP-Cycle）完備**・**構造化タグ管理システム実装**・Tag-Glossary実ファイル作成・プロダクション対応修正 |
+
+## 本書の更新方法
+
+### 軽微な修正（誤字・リンク修正等）
+```bash
+# 1. ファイル編集
+vim docs/ops_manual.md
+
+# 2. コミット
+git add docs/ops_manual.md
+git commit -m "docs(ops): fix typo in section X"
+git push origin main
+```
+
+### バージョンアップを伴う更新
+```bash
+# 1. メタ情報のバージョン・更新日を更新
+# 2. 変更履歴テーブルに新バージョン追加
+# 3. コミット
+git add docs/ops_manual.md
+git commit -m "docs(ops): bump to vX.X with [機能名] updates"
+git push origin main
+```
+
+### 大幅な改訂（セクション追加・構造変更）
+1. **Issue作成**: GitHub Issues で改訂内容を議論
+2. **ブランチ作成**: `git checkout -b ops-update/feature-name`
+3. **PR作成**: Pull Request → Review → Merge
+4. **タグ作成**: `git tag v1.X-ops-manual`
 
 ---
+
+**ドキュメントバージョン**: v1.2  
+**最終更新日**: 2025年5月25日  
+**ステータス**: プロダクション対応完了 ✅  
+**次回定期レビュー**: 2025年6月末（月次運用レビューと合わせて実施）
 
 **以上** 
