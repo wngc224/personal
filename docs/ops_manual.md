@@ -329,9 +329,100 @@ knowledge-vault/assets/confidential/
 
 ---
 
-## 5. ルーティン作業詳細
+## 5. モバイル運用（スマホでCCP-Cycle）
 
-### 5.1 日次
+### 5.1 概要
+
+スマートフォンでも**CCP-Cycle**を効率的に回すための3つの仕組みを整備し、移動中・外出先でも知識生産を継続する。
+
+### 5.2 スマホでCCP-Cycleを回す3つの仕組み
+
+| 目的                    | iOS／Android での具体策                                                                                                                          | 所要設定                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| **1. ノートの双方向同期**      | **Obsidian Mobile** + <br>① *Obsidian Sync*（¥900/月）<br>② *iCloud Drive / Dropbox*（無料）<br>③ *Git*：iOS→*Working Copy*／Android→*Termux + Git* | - Obsidian Mobile インストール<br>- 同期フォルダに **knowledge-vault/** を丸ごと置く              |
+| **2. 1タップ Capture**   | **iOS Shortcut / Android Share** → `obsidian://new?vault=knowledge-vault&content={{本文}}&folder=00_Capture&tags=inbox`                      | - iOS: ショートカット "Share to Obsidian" 作成<br>- Android: *Obsidian URI Plugin* を有効化 |
+| **3. GPT との対話結果を即保存** | **Opener → Obsidian**  (iOS "共有" ボタン → Obsidian URI) <br>or  **ChatGPT app + 自動スクリーンショット OCR → Shortcut**                                  | - ChatGPT アプリ or Safari で回答表示→共有メニューで "Save to Obsidian"                       |
+
+### 5.3 ノート同期方式の選び方
+
+| 方式                     | オフライン      | 利便性        | 競合解消            | 備考           |
+| ---------------------- | ---------- | ---------- | --------------- | ------------ |
+| **Obsidian Sync**      | ◎          | ◎（差分同期・履歴） | ◎（自動）           | コストあり        |
+| iCloud / Dropbox       | ◎          | ○（ファイル同期）  | △（競合ファイル発生時に手動） | iOS ネイティブで手軽 |
+| **Git + Working Copy** | ○（Pull 必要） | ○（バージョン管理） | ◎（マージで解決）       | Git が好きなら最強  |
+
+> **推奨**: iOSなら *iCloud Drive* → Obsidian Mobile の「iCloud フォルダを Vault として開く」が手間ゼロ。
+
+### 5.4 共有メニューでニュース記事→00_Capture/
+
+**iOS Shortcut（設定例）**
+
+1. **入力**：「共有シート」
+2. **アクション**：
+   * "記事を Markdown で取得"（*Scripting*►Get Article）
+   * "URL Encode"
+   * "Open URL" →
+     ```
+     obsidian://new?
+     vault=knowledge-vault&
+     content={{Encoded Text}}&
+     name={{Article Title}}&
+     folder=00_Capture&
+     tags=inbox,news
+     ```
+
+保存後は PC 側の Curate で `#processed` に昇格。
+
+### 5.5 GPT対話のモバイル自動保存
+
+| 方法                         | 流れ                                                  |
+| -------------------------- | --------------------------------------------------- |
+| **A. 共有→Obsidian URI**     | ChatGPT アプリで回答→「共有」→ "Save to Obsidian"             |
+| **B. Shortcut Automation** | クリップボード監視→`obsidian://new?content={{clipboard}}...` |
+| **C. Working Copy Commit** | Working Copy 内で "New File" → `00_Capture/` に貼付→Push |
+
+### 5.6 スマホでの最短5分ルーチン
+
+| タイミング | 操作                          | アプリ                | 所要時間 |
+| ----- | --------------------------- | ------------------ | ---- |
+| 通勤中   | 記事・アイデアを共有→Obsidian         | ブラウザ/News→Shortcut | 1分   |
+| 昼休み   | `00_Capture` 内を 3 件だけタグ付け   | Obsidian Mobile    | 3分   |
+| 帰宅前   | GPT で質問→回答を保存               | ChatGPT → Shortcut | 1分   |
+| 就寝前   | Daily Note に "今日の学び 1 行" 追記 | Obsidian Mobile    | 1分   |
+
+### 5.7 モバイル特有の競合リスクと対策
+
+| リスク                   | 回避策                                                                            |
+| --------------------- | ------------------------------------------------------------------------------ |
+| **ファイル競合** (同期前に両方編集) | - モバイル編集後は **Pull → Push** 順守<br>- iCloud は「Conflict」ファイルを手動 Merge             |
+| **通信オフ時に編集**          | - Obsidian Mobile はローカル保存 → 電波回復後に同期<br>- Git 運用なら `working-copy://` で後から Push |
+| **容量肥大 (写真貼付け)**      | - モバイルは画像ではなく **URL 共有** を推奨<br>- 画像は自動で `assets/YYYY-MM` サブフォルダへ              |
+
+### 5.8 モバイル導入チェックリスト
+
+**事前準備**:
+- [ ] Obsidian Mobile インストール & Vault パス認識
+- [ ] 同期方式選択（Obsidian Sync / iCloud / Git）
+- [ ] ショートカット "Save to Obsidian" 動作確認 ※タグ `#inbox` 自動付与
+- [ ] Working Copy 連携（Git 運用時のみ）
+
+**動作確認**:
+- [ ] モバイル→PC で `00_Capture` ノートが見える
+- [ ] PC→モバイル で既存ノートが同期される
+- [ ] 競合ファイル発生時の対処法理解
+
+**運用開始**:
+- [ ] 通勤時間でのキャプチャ習慣化
+- [ ] 昼休みでの簡易Curate実施
+- [ ] GPT対話結果の即時保存
+
+これで **ニュース・GPT 対話・アイデア** すべてをスマホから即 Vault に取り込み、デスクトップ側で深掘り→アウトプットまでシームレスに実現できる。
+
+---
+
+## 6. ルーティン作業詳細
+
+### 6.1 日次
 
 | 時刻  | 作業                                    | 所要    |
 | --- | ------------------------------------- | ----- |
@@ -340,14 +431,14 @@ knowledge-vault/assets/confidential/
 | 退勤前 | 今日の学びを Permanent 化                    | 5 min |
 |     | グラフでリンク増強                             | 5 min |
 
-### 5.2 週次（日曜）
+### 6.2 週次（日曜）
 
 1. Cursor で週報テンプレ Prompt 実行
 2. Dataview による KPI 収集
 3. `90_Archive` 整理、未使用タグ監査
 4. GitHub Pages へ Weekly Digest Push（自動化予定）
 
-### 5.3 月次（最終営業日）
+### 6.3 月次（最終営業日）
 
 * プラグイン更新テスト → `plugins-dev` → `main`
 * タグ／メタデータ整合性チェック (`dashboard.md`)
@@ -355,7 +446,7 @@ knowledge-vault/assets/confidential/
 
 ---
 
-## 6. KPI とダッシュボード
+## 7. KPI とダッシュボード
 
 | 指標            | 目標値    | 取得方法                                  |
 | ------------- | ------ | ------------------------------------- |
@@ -368,7 +459,7 @@ knowledge-vault/assets/confidential/
 
 ---
 
-## 7. タグ運用ポリシー
+## 8. タグ運用ポリシー
 
 | カテゴリ | 接頭辞                   | 例            | 備考         |
 | ---- | --------------------- | ------------ | ---------- |
@@ -381,7 +472,7 @@ knowledge-vault/assets/confidential/
 
 ---
 
-## 8. バックアップ & 復旧
+## 9. バックアップ & 復旧
 
 | ケース      | 手順                                      |
 | -------- | --------------------------------------- |
@@ -391,7 +482,7 @@ knowledge-vault/assets/confidential/
 
 ---
 
-## 9. セキュリティ・権限
+## 10. セキュリティ・権限
 
 * リポジトリは **Private**、招待は Owner 承認制
 * PC/Mobile いずれも **パスコード + GitHub 2FA**
@@ -399,7 +490,7 @@ knowledge-vault/assets/confidential/
 
 ---
 
-## 10. 変更管理
+## 11. 変更管理
 
 1. Issue or Discussion に改善提案を登録
 2. `plugins-dev` または `ops-update` ブランチ作成
@@ -407,7 +498,7 @@ knowledge-vault/assets/confidential/
 
 ---
 
-## 11. 今後の拡張ロードマップ
+## 12. 今後の拡張ロードマップ
 
 | 時期     | 施策              | 詳細                                           |
 | ------ | --------------- | -------------------------------------------- |
@@ -418,7 +509,7 @@ knowledge-vault/assets/confidential/
 
 ---
 
-## 12. 問題管理 & サポート窓口
+## 13. 問題管理 & サポート窓口
 
 * 運用上の質問・障害は GitHub Issues ラベル`ops` で起票
 * 緊急復旧（データ喪失など）は Slack `#vault-ops` で @here コール
