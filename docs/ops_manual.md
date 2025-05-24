@@ -40,6 +40,7 @@
 │   └── ops_manual.md  # 🛠️ 運用定義書（このファイル・完全版）
 ├── .gitignore         # 🔧 Git除外設定（統一済み）
 └── knowledge-vault/   # 🧠 Obsidian Vault本体
+    ├── README.md      # ⚙️ Obsidian操作ガイド（Vault内専用）
     ├── 00_Capture/    # 統合受け皿（Inbox + Fleeting）
     ├── 10_Literature/ # 外部ソース要約
     ├── 20_Permanent/  # 自分の知識・洞察（永久保存）
@@ -52,7 +53,9 @@
 
 **役割分担**:
 - **ルートレベル**: プロジェクト管理・ドキュメント・Git設定
+- **docs/**: 運用マニュアル・詳細仕様書
 - **knowledge-vault/**: Obsidian作業エリア（実際のノート管理）
+  - `README.md`: Obsidian起動・プラグイン設定・日常チェック専用ガイド
 
 ### 3.2 プラグイン & バージョン管理
 
