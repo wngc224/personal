@@ -4,7 +4,7 @@
 
 | 項目    | 内容                           |
 | ----- | ---------------------------- |
-| バージョン | v1.1 （構造最適化版）                |
+| バージョン | v1.2 （構造化タグ・モバイル運用完備版）         |
 | 作成日   | 2025‑05‑25                   |
 | 更新日   | 2025‑05‑25                   |
 | 作成者   | ChatGPT o3・Claude-4-sonnet／Oikawa Masaya 監修 |
@@ -60,7 +60,7 @@
 | --------- | ----------------------- | -------- | ----------- | ----------------------------- |
 | Core      | Templates / Daily Notes | テンプレ／日次  | Obsidian 標準 |                               |
 | Community | Dataview                | 動的クエリ    | `>= 0.5.63` | JS Queries 有効化必須              |
-|           | QuickAdd                | 高速キャプチャ  | `>= 0.9.8`  | Macro "Capture → 00\_Capture" |
+|           | QuickAdd                | 高速キャプチャ  | `>= 0.9.8`  | Macro "Capture → 00_Capture" |
 |           | Templater               | 高度テンプレ   | `>= 1.17`   | frontmatter 自動挿入              |
 |           | Periodic Notes          | 日次/週次ノート | `>= 0.8.0`  | Daily Note 00:00 JST          |
 
@@ -550,7 +550,7 @@ WHERE length(file.tags) = 0 OR any(file.tags, (t) => !contains(t, "/"))
 
 #### 8.7.3 Tag Glossary（タグ辞書）
 
-`_meta/Tag-Glossary.md` ファイルを作成し、以下を記載：
+`knowledge-vault/_templates/Tag-Glossary.md` ファイルを作成し、以下を記載：
 
 ```markdown
 # タグ体系辞書

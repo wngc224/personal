@@ -108,7 +108,13 @@ SORT file.mtime desc
 
 ## 🔄 変更管理
 
-詳細な変更手順は [運用定義書](docs/ops_manual.md) の「10. 変更管理」を参照してください。
+詳細な変更手順は [運用定義書](docs/ops_manual.md) の「11. 変更管理」を参照してください。
+
+## 📝 開発者向け情報
+
+- **Markdown Lint**: コード品質維持のため、将来的に `markdown-lint.yml` を導入予定
+- **Conventional Commits**: コミットメッセージは `feat:`, `fix:`, `docs:` 等の規約に準拠
+- **Git運用**: 詳細は [運用定義書](docs/ops_manual.md) の「3.3 Git運用」を参照
 
 ---
 
