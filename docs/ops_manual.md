@@ -459,16 +459,157 @@ knowledge-vault/assets/confidential/
 
 ---
 
-## 8. タグ運用ポリシー
+## 8. タグ運用ポリシー（構造化管理）
 
-| カテゴリ | 接頭辞                   | 例            | 備考         |
-| ---- | --------------------- | ------------ | ---------- |
-| 状態   | `#inbox` `#processed` |              | フロー管理      |
-| 種別   | `#lit` `#permanent`   |              | ノートタイプ     |
-| テーマ  | 自由（英単語推奨）             | `#SQL` `#AI` | 監査ツールで孤立検出 |
-| 時間   | `#2025` `#W22`        |              | 週次リポート連携   |
+### 8.1 基本方針
 
-**タグの新設時は README に 1 行追記し、二重タグを避ける。**
+知識の効率的な分類・検索を実現するため、**階層タグ × ファセットタグ**のハイブリッド方式を採用し、フォルダを増やさずに細やかな分類を可能にする。
+
+### 8.2 構造化タグの2つのアプローチ
+
+| アプローチ                  | イメージ                                   | 特徴／検索例                                                       |
+| ---------------------- | -------------------------------------- | ------------------------------------------------------------- |
+| **A. 階層タグ（スラッシュ区切り）**  | `#lang/zh/grammar`<br>`#lang/zh/vocab` | *自然にツリー化*<br>- Tag Pane で折りたたみ表示<br>- `lang/zh/*` で中間階層ごと検索可能 |
+| **B. ファセット（複数タグを並べる）** | `#lang/zh` ＋ `#topic/grammar`          | *組み合わせ自由*<br>- 複数の視点で AND/OR 検索<br>- タグ種別をプレフィックスで区切る         |
+
+### 8.3 推奨ルール：「階層 × ファセット」のハイブリッド
+
+| レイヤ            | 役割        | 例                                  | Tips         |
+| -------------- | --------- | ---------------------------------- | ------------ |
+| **1. ドメイン**    | 学習対象・業務領域 | `lang/zh` `topic/databricks`       | *親タグ単独* でも使う |
+| **2. サブトピック**  | 細分化カテゴリ   | `lang/zh/grammar` `lang/zh/vocab`  | 2〜3 階層までに抑える |
+| **3. ファセットタグ** | 別軸属性      | `type/literature` `level/beginner` | 併用で多軸検索      |
+
+### 8.4 従来タグとの統合
+
+| カテゴリ | 従来（基本） | 新方式（構造化） | 例 |
+|------|-----------|-------------|---|
+| 状態   | `#inbox` `#processed` | **変更なし** | フロー管理専用 |
+| 種別   | `#lit` `#permanent` | `#type/literature` `#type/permanent` | 明確な階層化 |
+| テーマ  | `#SQL` `#AI` | `#tech/sql` `#tech/ai` | ドメイン統一 |
+| 時間   | `#2025` `#W22` | `#time/2025` `#time/W22` | 時系列管理 |
+
+### 8.5 具体的タグ設計例
+
+**中国語学習ノートの場合**:
+```yaml
+tags:
+  - lang/zh/grammar    # 階層タグ（ドメイン/サブトピック）
+  - type/literature    # ファセットタグ（種別）
+  - level/beginner     # ファセットタグ（レベル）
+  - source/textbook    # ファセットタグ（情報源）
+```
+
+**技術ノートの場合**:
+```yaml
+tags:
+  - tech/python/pandas # 階層タグ
+  - type/permanent     # ファセットタグ
+  - level/intermediate # ファセットタグ
+  - project/data-analysis # ファセットタグ
+```
+
+### 8.6 検索・抽出クエリ集
+
+| 検索要件                         | Dataview クエリ例                                                                           |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| 中国語の文法ノートのみ                   | `WHERE contains(file.tags, "lang/zh/grammar")`                                          |
+| 中国語（文法＋単語）の全ノート            | `WHERE any(file.tags, (t) => startswith(t, "lang/zh/"))`                                            |
+| 入門レベルのノート全般                  | `WHERE contains(file.tags,"level/beginner")`                                            |
+| 中国語の文法ノートのうちLiterature種別 | `WHERE contains(file.tags,"lang/zh/grammar") AND contains(file.tags,"type/literature")` |
+| 技術系のPermanentノート | `WHERE any(file.tags, (t) => startswith(t, "tech/")) AND contains(file.tags, "type/permanent")` |
+| 今年作成された全プロジェクト関連ノート | `WHERE contains(file.tags,"time/2025") AND any(file.tags, (t) => startswith(t, "project/"))` |
+
+### 8.7 タグメンテナンス戦略
+
+#### 8.7.1 必須プラグイン
+
+**Tag Wrangler**:
+- 階層タグの一括リネーム・マージ機能
+- タグの統計表示・重複検出
+- 使用頻度による整理
+
+#### 8.7.2 月次タグ監査
+
+**プリフィックス分布チェック**:
+```dataview
+TABLE length(rows) AS Count
+FROM ""
+FLATTEN file.tags as tag
+WHERE tag != null
+GROUP BY choice(split(tag,"/")[0],"unstructured") AS root_category
+SORT Count DESC
+```
+
+**未使用・孤立タグ検出**:
+```dataview
+TABLE file.tags
+FROM ""
+WHERE length(file.tags) = 0 OR any(file.tags, (t) => !contains(t, "/"))
+```
+
+#### 8.7.3 Tag Glossary（タグ辞書）
+
+`_meta/Tag-Glossary.md` ファイルを作成し、以下を記載：
+
+```markdown
+# タグ体系辞書
+
+## ドメインタグ（第1階層）
+- `lang/` - 言語学習関連
+- `tech/` - 技術・IT関連  
+- `business/` - ビジネス・業務関連
+- `life/` - 生活・個人関連
+
+## ファセットタグ
+- `type/` - ノートタイプ（literature/permanent/fleeting）
+- `level/` - 難易度（beginner/intermediate/advanced）
+- `source/` - 情報源（book/article/video/course）
+- `project/` - プロジェクト名
+- `time/` - 時系列（年/週/月）
+
+## 状態タグ（構造化対象外）
+- `#inbox` - 未処理
+- `#processed` - 処理済み
+```
+
+### 8.8 タグ運用チェックリスト
+
+**新規ノート作成時**:
+- [ ] ドメインタグ（1つ必須）
+- [ ] サブトピックタグ（必要に応じて）
+- [ ] ファセットタグ（type/は必須、他は任意）
+- [ ] 状態タグ（#inbox等）
+
+**週次メンテナンス**:
+- [ ] 新規タグのプリフィックス確認
+- [ ] Tag Glossaryとの整合性チェック
+- [ ] 重複・類似タグの統合検討
+
+**月次監査**:
+- [ ] Dataviewクエリで統計確認
+- [ ] Tag Wranglerで使用頻度分析
+- [ ] 階層構造の見直し
+- [ ] 新ドメイン追加要否判断
+
+### 8.9 段階的導入プラン
+
+**Phase 1（Week 1）**: 基本構造確立
+- [ ] Tag Wranglerインストール
+- [ ] Tag Glossary作成
+- [ ] 既存タグの階層化（tech/ai、lang/zh等）
+
+**Phase 2（Week 2-3）**: ファセットタグ導入
+- [ ] type/系タグの統一
+- [ ] level/系タグの追加
+- [ ] 既存ノートの段階的更新
+
+**Phase 3（Week 4-）**: 自動化・最適化
+- [ ] 月次監査Dataviewクエリ設置
+- [ ] タグ自動提案のQuickAddマクロ
+- [ ] 運用ルールの微調整
+
+**タグの新設時は Tag Glossary に1行追記し、二重タグを避ける。**
 
 ---
 
