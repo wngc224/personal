@@ -7,7 +7,7 @@
 | バージョン | v1.1 （構造最適化版）                |
 | 作成日   | 2025‑05‑25                   |
 | 更新日   | 2025‑05‑25                   |
-| 作成者   | ChatGPT（claude-3.5-sonnet）／Oikawa Masaya 監修 |
+| 作成者   | Claude-4-sonnet／Oikawa Masaya 監修 |
 | 想定読者  | 本 Vault を運用・保守する全メンバー        |
 | 関連文書  | [README.md](../README.md) - プロジェクト概要・クイックスタート |
 
