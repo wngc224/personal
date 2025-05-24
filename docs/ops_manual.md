@@ -66,20 +66,233 @@
 
 > **プラグイン更新は `plugins-dev` ブランチ上で検証後、`main` にマージすること。**
 
-### 3.3 Git 運用
+### 3.3 Git 運用（統一リポジトリ方式）
 
-* **リポジトリ**: `github.com/<org>/knowledge-vault` (Private)
-* **主要ブランチ**: `main`（運用） / `plugins-dev`（検証）
-* **コミット規約**: Conventional Commits (`feat:`, `fix:`, `docs:` など)
-* **タグ**: `v1.0-original` (旧構造), 月次リリースタグ `2025-05-R` 等
+#### 3.3.1 リポジトリ構成
 
-### 3.4 自動化
+**単一リポジトリ管理**:
+```
+/Users/maoikawa/works/personal/ (Git Repository)
+├── .git/              # 📋 統一Git管理
+├── README.md          # プロジェクト案内
+├── docs/              # 運用ドキュメント
+├── .gitignore         # 除外設定
+└── knowledge-vault/   # Obsidian Vault本体
+    ├── .obsidian/     # 設定・プラグイン（追跡対象）
+    ├── 00_Capture/    # ノート管理
+    └── ...
+```
 
-| 名称                          | トリガ                     | 内容                                |
-| --------------------------- | ----------------------- | --------------------------------- |
-| **backup.yml**              | `push`                  | Vault を ZIP → GitHub Artifacts 保存 |
-| **markdown-lint.yml**       | `push`                  | markdownlint CLI で規約違反チェック        |
-| **weekly\_report.yml** (予定) | `schedule`（日曜23:55 JST） | Cursor CLI→週報生成→PR 作成             |
+#### 3.3.2 ブランチ戦略
+
+| ブランチ名 | 用途 | 保護レベル | マージ条件 |
+|----------|------|----------|----------|
+| `main` | 本番運用・日常作業 | 保護 | 直接コミット可（個人利用） |
+| `plugins-dev` | プラグイン更新テスト | 検証用 | PR→Review→Merge |
+| `feature/xxxx` | 大型機能追加 | 開発用 | PR→Review→Merge |
+| `hotfix/xxxx` | 緊急修正 | 修正用 | 即座にマージ |
+
+#### 3.3.3 コミット規約（Conventional Commits）
+
+**フォーマット**: `<type>(<scope>): <description>`
+
+| Type | 用途 | 例 |
+|------|------|---|
+| `feat` | 新機能・ノート追加 | `feat(capture): add new meeting notes template` |
+| `fix` | バグ修正・リンク修正 | `fix(permanent): correct broken internal links` |
+| `docs` | ドキュメント更新 | `docs(readme): update installation instructions` |
+| `refactor` | 構造変更・整理 | `refactor(vault): reorganize literature notes by topic` |
+| `chore` | 設定・メンテナンス | `chore(obsidian): update plugin configurations` |
+| `style` | フォーマット・タグ統一 | `style(tags): standardize tag naming convention` |
+
+**コミット例**:
+```bash
+git commit -m "feat(permanent): add machine learning fundamentals note
+
+- Cover supervised vs unsupervised learning
+- Include practical examples with datasets
+- Link to related literature notes
+- Add #AI #ML tags for discoverability"
+```
+
+#### 3.3.4 日常Git運用フロー
+
+**毎日の作業サイクル**:
+```bash
+# 1. 朝：最新状態に同期
+git pull origin main
+
+# 2. ノート作業・編集（Obsidian/Cursor）
+# ...作業...
+
+# 3. 夕方：変更をコミット
+git add .
+git status  # 変更確認
+git commit -m "feat(capture): add daily meeting insights"
+
+# 4. リモートへプッシュ
+git push origin main
+```
+
+#### 3.3.5 複数デバイス同期戦略
+
+**PC ↔ Mobile 同期**:
+```bash
+# PCで作業終了時
+git add . && git commit -m "chore: sync daily progress" && git push
+
+# Mobileで作業開始前（Git対応アプリ使用時）
+git pull origin main
+
+# Mobile編集後
+git add . && git commit -m "feat(capture): mobile quick notes" && git push
+```
+
+**同期対象・非同期対象**:
+- ✅ **同期**: `.md`ファイル、テンプレート、プラグイン設定
+- ❌ **非同期**: `workspace.json`（デバイス固有設定）、キャッシュファイル
+
+#### 3.3.6 プラグイン管理Git戦略
+
+**更新テストフロー**:
+```bash
+# 1. テスト用ブランチ作成
+git checkout -b plugins-dev
+git pull origin main
+
+# 2. プラグイン更新（Obsidian内）
+# Community Plugins → Update
+
+# 3. 動作確認
+# Dataview/QuickAdd/Templater テスト実行
+
+# 4. 問題なければマージ
+git add .obsidian/community-plugins.json
+git commit -m "chore(plugins): update dataview to v0.5.65"
+git checkout main
+git merge plugins-dev
+git push origin main
+
+# 5. ブランチ削除
+git branch -d plugins-dev
+```
+
+#### 3.3.7 リモートリポジトリ設定
+
+**推奨設定**:
+- **GitHub Private Repository** 推奨
+- **リポジトリ名**: `knowledge-production-system`
+- **説明**: `Obsidian×Cursor knowledge production flow with CCP-Cycle`
+
+**初回設定**:
+```bash
+# リモート追加
+git remote add origin https://github.com/<username>/knowledge-production-system.git
+
+# 初回プッシュ
+git push -u origin main
+
+# 以降は短縮形
+git push
+git pull
+```
+
+#### 3.3.8 自動バックアップ設定
+
+**.github/workflows/backup.yml**:
+```yaml
+name: Daily Vault Backup
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 15 * * *'  # 毎日24:00 JST
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create backup
+        run: |
+          zip -r vault-backup-$(date +%Y%m%d).zip knowledge-vault/
+      - name: Upload backup
+        uses: actions/upload-artifact@v3
+        with:
+          name: vault-backup-$(date +%Y%m%d)
+          path: vault-backup-*.zip
+          retention-days: 30
+```
+
+#### 3.3.9 緊急時復旧手順
+
+| シナリオ | 対応手順 | 所要時間 |
+|---------|---------|---------|
+| **ファイル誤削除** | `git checkout HEAD~1 -- <file>` | 1分 |
+| **大量ファイル破損** | `git reset --hard HEAD~1` | 3分 |
+| **リポジトリ破損** | GitHub→Clone新規 | 5分 |
+| **設定全損失** | Actions Artifacts→ZIP復元 | 10分 |
+
+**復旧コマンド例**:
+```bash
+# 特定ファイル復旧
+git checkout HEAD~1 -- knowledge-vault/20_Permanent/重要なノート.md
+
+# 1つ前のコミットに戻る
+git reset --hard HEAD~1
+
+# 完全リセット（最新リモート状態）
+git fetch origin
+git reset --hard origin/main
+```
+
+#### 3.3.10 セキュリティ・権限管理
+
+**アクセス制御**:
+- **Private Repository** 必須
+- **2FA認証** 有効化
+- **Personal Access Token** 使用（パスワード認証廃止）
+
+**機密ファイル管理**:
+```bash
+# .gitattributes（LFS管理）
+*.pdf filter=lfs diff=lfs merge=lfs -text
+*.docx filter=lfs diff=lfs merge=lfs -text
+assets/confidential/** filter=lfs diff=lfs merge=lfs -text
+
+# .gitignore追加項目
+knowledge-vault/assets/private/
+knowledge-vault/assets/confidential/
+**/.DS_Store
+```
+
+#### 3.3.11 運用チェックリスト
+
+**日次**:
+- [ ] `git status` で変更確認
+- [ ] 意味のあるコミットメッセージ作成
+- [ ] `git push` で同期
+
+**週次**:
+- [ ] `git log --oneline -n 10` でコミット履歴確認
+- [ ] 未追跡ファイル確認（`git status`）
+- [ ] `.gitignore` 適用チェック
+
+**月次**:
+- [ ] プラグイン更新（`plugins-dev` ブランチ）
+- [ ] GitHub Actions ログ確認
+- [ ] リモートリポジトリ容量チェック
+
+### 3.4 自動化・CI/CD
+
+前述の3.3.8で設定したGitHub Actionsに加えて、以下の自動化を段階的に導入予定：
+
+| 名称 | トリガ | 内容 | 実装状況 |
+|------|--------|------|----------|
+| **backup.yml** | `push` + 日次 | Vault を ZIP → GitHub Artifacts 保存 | ✅ 設定済み |
+| **markdown-lint.yml** | `push` | markdownlint CLI で規約違反チェック | 🔄 予定 |
+| **weekly-report.yml** | 日曜23:55 JST | Cursor CLI→週報生成→PR 作成 | 🔄 予定 |
+| **tag-audit.yml** | 月次 | 未使用タグ検出・重複タグ統合提案 | 🔄 予定 |
 
 ---
 
