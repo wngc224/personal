@@ -1,0 +1,29 @@
+# Obsidian
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/hotkeys.json
+.obsidian/appearance.json
+.obsidian/core-plugins.json
+.obsidian/core-plugins-migration.json
+.obsidian/community-plugins.json
+.obsidian/graph.json
+.obsidian/canvas.json
+
+# プラグインの設定は追跡（企画書に基づく）
+# .obsidian/plugins/ は追跡対象
+
+# プラグインnode_modules除外（リポジトリ肥大化防止）
+.obsidian/plugins/**/node_modules/
+
+# システムファイル
+.DS_Store
+Thumbs.db
+
+# 一時ファイル
+*.tmp
+*.temp
+~$*
+
+# 機密情報（必要に応じて追加）
+**/private/
+**/confidential/ 
