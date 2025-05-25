@@ -10,17 +10,11 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
-  id-token: write
-
-concurrency:
-  group: claude-${{ github.event.issue.number || github.event.pull_request.number }}
-  cancel-in-progress: true
 
 jobs:
   claude:
     if: contains(github.event.comment.body, '@claude')
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,11 +23,6 @@ jobs:
           fetch-depth: 0
 
       - name: Claude Code Action
-        uses: anthropics/claude-code-action@v0.0.7
+        uses: anthropics/claude-code-action@beta
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          allowed_tools: |
-            Bash(git status)
-            Bash(git diff)
-            View
-            GlobTool 
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }} 
