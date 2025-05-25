@@ -15,14 +15,16 @@ permissions:
 jobs:
   claude:
     if: |
-      (
-        github.event_name == 'issue_comment' &&
-        github.event.comment &&
-        contains(github.event.comment.body, '@claude')
-      ) || (
-        github.event_name == 'pull_request_review_comment' &&
-        github.event.comment &&
-        contains(github.event.comment.body, '@claude')
+      github.actor != 'claude' && github.actor != 'claude[bot]' && (
+        (
+          github.event_name == 'issue_comment' &&
+          github.event.comment &&
+          contains(github.event.comment.body, '@claude')
+        ) || (
+          github.event_name == 'pull_request_review_comment' &&
+          github.event.comment &&
+          contains(github.event.comment.body, '@claude')
+        )
       )
     runs-on: ubuntu-latest
     timeout-minutes: 30
