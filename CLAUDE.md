@@ -27,6 +27,7 @@
 - `contents: write`: ファイル修正・コミット・PR作成に必要
 - `pull-requests: write`: PR作成・コメント投稿に必要  
 - `issues: write`: Issue対応・ラベル付けに必要
+- `id-token: write`: GitHub App OIDC認証に必要（セキュアトークン発行用）
 
 ## 禁止事項
 - APIキーやシークレットをコードに直接含めない
