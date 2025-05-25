@@ -26,6 +26,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      - name: Debug Event Info
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Event action: ${{ github.event.action }}"
+          echo "Issue body: ${{ github.event.issue.body }}"
+          echo "Comment body: ${{ github.event.comment.body }}"
+          echo "Review body: ${{ github.event.review.body }}"
+          
       - name: Checkout
         uses: actions/checkout@v4
         with:
