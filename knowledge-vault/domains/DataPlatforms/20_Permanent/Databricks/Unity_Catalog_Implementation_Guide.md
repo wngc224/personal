@@ -497,7 +497,7 @@ GRANT CREATE SCHEMA ON CATALOG staging_analytics TO data_engineers;
 
 ### 内部リンク
 - [[Databricks_Data_Intelligence_Platform_2025]] - プラットフォーム概要
-- [[Delta_Lake_Advanced_Features]] - Delta Lake詳細機能
+- [[Delta_Lake_Advanced_Operations]] - Delta Lake詳細機能
 - [[MLflow_Model_Management]] - MLモデル管理
 
 ### 外部リンク

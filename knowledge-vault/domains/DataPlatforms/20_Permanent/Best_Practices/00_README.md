@@ -135,9 +135,9 @@ SORT difficulty ASC
 ## 🔗 関連リソース
 
 ### 内部リンク
-- [[Getting_Started]] - DataPlatformsドメイン全体概要
-- [[Databricks_Certified_Data_Engineer_Associate]] - 体系的学習
-- [[SnowPro_Core_Certification]] - 体系的学習
+- [[../../Getting_Started]] - DataPlatformsドメイン全体概要
+- [[../../30_Projects/Certification/Databricks_Cert_Journey/Databricks_Certified_Data_Engineer_Associate]] - 体系的学習
+- [[../../30_Projects/Certification/Snowflake_Cert_Journey/SnowPro_Core_Certification]] - 体系的学習
 
 ### 外部リンク
 - [Databricks Best Practices](https://docs.databricks.com/best-practices/index.html)

@@ -24,15 +24,15 @@ modified: 2025-06-20
 
 ### Step 1: 基本概念の理解 (10分)
 まずは基本概念を理解しましょう：
-- [[Data_Warehouse_vs_Lakehouse]] - データアーキテクチャの基礎
-- [[Databricks_vs_Snowflake_Overview]] - プラットフォーム比較
+- [[20_Permanent/Concepts/Data_Warehouse_vs_Lakehouse]] - データアーキテクチャの基礎
+- [[20_Permanent/Comparisons/Databricks_vs_Snowflake_Overview]] - プラットフォーム比較
 
 ### Step 2: 学習パスの選択 (5分)
 あなたの目標に応じて学習パスを選択：
 
 **🎓 資格取得重視**
-- [[Databricks_Certified_Data_Engineer_Associate]] - Databricks資格
-- [[SnowPro_Core_Certification]] - Snowflake資格
+- [[30_Projects/Certification/Databricks_Cert_Journey/Databricks_Certified_Data_Engineer_Associate]] - Databricks資格
+- [[30_Projects/Certification/Snowflake_Cert_Journey/SnowPro_Core_Certification]] - Snowflake資格
 
 **🛠️ 技術習得重視**
 - `20_Permanent/Databricks/` - Databricks技術詳細
@@ -85,7 +85,7 @@ modified: 2025-06-20
 ```markdown
 # 今日から始めるなら：
 
-1. [[Certification_Study_Note.md]] テンプレートを使用
+1. [[_templates/Certification_Study_Note]] テンプレートを使用
 2. 目標資格と学習期間を設定
 3. 週次レビューで進捗確認
 ```
@@ -94,7 +94,7 @@ modified: 2025-06-20
 ```markdown
 # 比較分析するなら：
 
-1. [[Technology_Comparison.md]] テンプレートを使用
+1. [[_templates/Technology_Comparison]] テンプレートを使用
 2. 比較軸を明確に定義
 3. 客観的なメトリクスで評価
 ```
@@ -103,7 +103,7 @@ modified: 2025-06-20
 ```markdown
 # ハンズオン実施後：
 
-1. [[Hands_on_Lab_Note.md]] テンプレートを使用
+1. [[_templates/Hands_on_Lab_Note]] テンプレートを使用
 2. トラブルシューティング詳細を記録
 3. 学習ポイントを言語化
 ```

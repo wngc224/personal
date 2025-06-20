@@ -109,7 +109,7 @@ updated_content: "2025-01-27"
 - [ ] [[Databricks_Community_Edition_Setup_2025]] - 2025年版セットアップ
 - [ ] [[Unity_Catalog_OSS_Lab]] - オープンソース版体験
 - [ ] [[Mosaic_AI_Quickstart]] - AI機能基礎
-- [ ] [[Delta_Lake_Advanced_Features]] - 最新機能（Liquid Clustering等）
+- [ ] [[Delta_Lake_Advanced_Operations]] - 最新機能（Liquid Clustering等）
 - [ ] [[Structured_Streaming_Performance]] - 高性能ストリーミング
 
 ### 2025年版実習メモ

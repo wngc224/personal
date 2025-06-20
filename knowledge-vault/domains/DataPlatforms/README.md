@@ -101,11 +101,11 @@ SORT last_updated DESC
 
 ### 初心者向け（1-2ヶ月）
 1. **基本概念の理解**
-   - [[Data_Warehouse_vs_Lakehouse]] - アーキテクチャの基本
+   - [[20_Permanent/Concepts/Data_Warehouse_vs_Lakehouse]] - アーキテクチャの基本
    - [[Getting_Started]] - 30分概要把握
 
 2. **プラットフォーム比較**
-   - [[Databricks_vs_Snowflake_Overview]] - 両PFの全体比較
+   - [[20_Permanent/Comparisons/Databricks_vs_Snowflake_Overview]] - 両PFの全体比較
 
 3. **ハンズオン開始**
    - 各PFの無料トライアル活用
@@ -113,27 +113,27 @@ SORT last_updated DESC
 
 ### 中級者向け（3-6ヶ月）
 1. **認定資格取得**
-   - [[Databricks_Certified_Data_Engineer_Associate]]
-   - [[SnowPro_Core_Certification]]
+   - [[30_Projects/Certification/Databricks_Cert_Journey/Databricks_Certified_Data_Engineer_Associate]]
+- [[30_Projects/Certification/Snowflake_Cert_Journey/SnowPro_Core_Certification]]
 
 2. **実践的機能の習得**
-   - [[Unity_Catalog_Implementation_Guide]] - ガバナンス実装
-   - [[Snowflake_Performance_Optimization_Techniques]] - 性能最適化
+   - [[20_Permanent/Databricks/Unity_Catalog_Implementation_Guide]] - ガバナンス実装
+- [[20_Permanent/Snowflake/Performance_Optimization_Techniques]] - 性能最適化
 
 3. **調査スキルの向上**
-   - [[01_General_Investigation_Methods]] - 一般的な調査手法の習得
+   - [[20_Permanent/Best_Practices/01_General_Investigation_Methods]] - 一般的な調査手法の習得
 
 ### 上級者向け（6ヶ月以上）
 1. **AI/ML統合**
-   - [[Mosaic_AI_Implementation_Guide]] - Databricks AI実装
-   - [[Snowflake_Cortex_AI_Implementation]] - Snowflake AI実装
+   - [[20_Permanent/Databricks/Mosaic_AI_Implementation_Guide]] - Databricks AI実装
+- [[20_Permanent/Snowflake/Cortex_AI_Implementation]] - Snowflake AI実装
 
 2. **高度なアーキテクチャ**
-   - [[04_Advanced_Data_Architecture_Patterns]] - エンタープライズパターン
+   - [[20_Permanent/Best_Practices/04_Advanced_Data_Architecture_Patterns]] - エンタープライズパターン
 
 3. **アドバンス技術**
-   - [[Delta_Lake_Advanced_Operations]] - Delta Lake運用
-   - [[Spark_Performance_Tuning_Advanced]] - Spark最適化
+   - [[20_Permanent/Databricks/Delta_Lake_Advanced_Operations]] - Delta Lake運用
+- [[20_Permanent/Databricks/Spark_Performance_Tuning_Advanced]] - Spark最適化
 
 ## 📊 学習進捗ダッシュボード
 
@@ -247,10 +247,10 @@ WHERE contains(tags, "architecture")
 ## 🆕 新着・更新情報
 
 ### 2025年6月更新
-- ✅ **一般調査手法**: [[01_General_Investigation_Methods]] 追加
-- ✅ **Databricks調査技法**: [[02_Databricks_Investigation_Methods]] 追加
-- ✅ **Snowflake調査手法**: [[03_Snowflake_Investigation_Methods]] 追加
-- ✅ **高度なアーキテクチャパターン**: [[04_Advanced_Data_Architecture_Patterns]] 追加
+- ✅ **一般調査手法**: [[20_Permanent/Best_Practices/01_General_Investigation_Methods]] 追加
+- ✅ **Databricks調査技法**: [[20_Permanent/Best_Practices/02_Databricks_Investigation_Methods]] 追加
+- ✅ **Snowflake調査手法**: [[20_Permanent/Best_Practices/03_Snowflake_Investigation_Methods]] 追加
+- ✅ **高度なアーキテクチャパターン**: [[20_Permanent/Best_Practices/04_Advanced_Data_Architecture_Patterns]] 追加
 - ✅ **Best Practices統括ガイド**: ファイル間の関係性・学習ルート明確化
 - ✅ **AI統合実装ガイド**: Databricks Mosaic AI、Snowflake Cortex AI の詳細実装
 - ✅ **2025年最新認定情報**: Unity Catalog OSS、Generation 2 対応
