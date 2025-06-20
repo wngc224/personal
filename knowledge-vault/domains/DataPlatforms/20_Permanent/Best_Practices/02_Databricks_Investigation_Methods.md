@@ -21,7 +21,7 @@ experience_level: "実務検証済み"
 
 Databricksの独自機能（Unity Catalog、Delta Lake、Databricks CLI）を活用した効率的な調査技法集。**SHOW/DESCRIBE/HISTORY** とCLIコマンドの組み合わせによる実務パターンを体系化。
 
-**前提**: [[General_Investigation_Methods]] の基本原則を理解していること。
+**前提**: [[01_General_Investigation_Methods]] の基本原則を理解していること。
 
 ## 🧠 Databricks調査の基本パターン
 
@@ -887,8 +887,8 @@ print(f"Health check completed in {health_status['check_duration_seconds']:.1f} 
 ## 📚 関連ドキュメント
 
 ### 内部リンク
-- **一般調査方法**: [[General_Investigation_Methods]]
-- **Snowflake比較**: [[Snowflake_Investigation_Methods]]
+- **一般調査方法**: [[01_General_Investigation_Methods]]
+- **Snowflake比較**: [[03_Snowflake_Investigation_Methods]]
 - **Unity Catalog実装**: [[Databricks/Unity_Catalog_Implementation_Guide]]
 - **性能最適化**: [[Databricks/Spark_Performance_Tuning_Advanced]]
 - **Delta Lake運用**: [[Databricks/Delta_Lake_Advanced_Operations]]

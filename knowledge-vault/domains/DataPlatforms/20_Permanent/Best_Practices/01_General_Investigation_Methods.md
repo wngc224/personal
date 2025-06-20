@@ -205,9 +205,9 @@ graph LR
 ## 📚 関連ドキュメント
 
 - **プラットフォーム固有調査**: 
-  - [[Snowflake_Investigation_Methods]]
-  - [[Databricks_Investigation_Methods]]
-- **アーキテクチャパターン**: [[Advanced_Data_Architecture_Patterns]]
+  - [[03_Snowflake_Investigation_Methods]]
+  - [[02_Databricks_Investigation_Methods]]
+- **アーキテクチャパターン**: [[04_Advanced_Data_Architecture_Patterns]]
 - **パフォーマンス最適化**:
   - [[Snowflake/Performance_Optimization_Techniques]]
   - [[Databricks/Spark_Performance_Tuning_Advanced]]

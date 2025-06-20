@@ -20,7 +20,7 @@ experience_level: "実務検証済み"
 
 Snowflakeの独自機能を活用した効率的な調査技法集。**SHOW → RESULT_SCAN → GET_DDL** の三段コンボを軸とした実務パターンを体系化。
 
-**前提**: [[General_Investigation_Methods]] の基本原則を理解していること。
+**前提**: [[01_General_Investigation_Methods]] の基本原則を理解していること。
 
 ## 🧠 Snowflake調査の基本パターン
 
@@ -677,8 +677,8 @@ DESCRIBE TABLE HISTORY production.sales.orders LIMIT 1;
 ## 📚 関連ドキュメント
 
 ### 内部リンク
-- **一般調査方法**: [[General_Investigation_Methods]]
-- **Databricks比較**: [[Databricks_Investigation_Methods]]
+- **一般調査方法**: [[01_General_Investigation_Methods]]
+- **Databricks比較**: [[02_Databricks_Investigation_Methods]]
 - **性能最適化**: [[Snowflake/Performance_Optimization_Techniques]]
 - **AI機能**: [[Snowflake/Cortex_AI_Implementation]]
 

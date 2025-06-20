@@ -1089,7 +1089,9 @@ kappa_arch.setup_streaming_pipeline()
 ## 🔗 関連リソース
 
 ### 内部リンク
-- [[Data_Platform_Investigation_Playbook]] - 調査手法
+- [[01_General_Investigation_Methods]] - 一般調査手法
+- [[02_Databricks_Investigation_Methods]] - Databricks調査手法  
+- [[03_Snowflake_Investigation_Methods]] - Snowflake調査手法
 - [[Databricks_Data_Intelligence_Platform_2025]] - Databricks詳細
 - [[Snowflake_AI_Data_Cloud_Architecture_2025]] - Snowflake詳細
 

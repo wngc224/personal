@@ -121,7 +121,7 @@ SORT last_updated DESC
    - [[Snowflake_Performance_Optimization_Techniques]] - 性能最適化
 
 3. **調査スキルの向上**
-   - [[Data_Platform_Investigation_Playbook]] - 実務調査手法の習得
+   - [[01_General_Investigation_Methods]] - 一般的な調査手法の習得
 
 ### 上級者向け（6ヶ月以上）
 1. **AI/ML統合**
@@ -129,7 +129,7 @@ SORT last_updated DESC
    - [[Snowflake_Cortex_AI_Implementation]] - Snowflake AI実装
 
 2. **高度なアーキテクチャ**
-   - [[Advanced_Data_Architecture_Patterns]] - エンタープライズパターン
+   - [[04_Advanced_Data_Architecture_Patterns]] - エンタープライズパターン
 
 3. **アドバンス技術**
    - [[Delta_Lake_Advanced_Operations]] - Delta Lake運用
@@ -247,10 +247,10 @@ WHERE contains(tags, "architecture")
 ## 🆕 新着・更新情報
 
 ### 2025年6月更新
-- ✅ **実務調査プレイブック**: [[Data_Platform_Investigation_Playbook]] 追加
-- ✅ **高度なアーキテクチャパターン**: [[Advanced_Data_Architecture_Patterns]] 追加  
-- ✅ **Snowflake高度SQLパターン**: [[Snowflake_Advanced_SQL_Patterns]] 追加
-- ✅ **Databricks調査技法**: [[Databricks_Investigation_Techniques]] 追加
+- ✅ **一般調査手法**: [[01_General_Investigation_Methods]] 追加
+- ✅ **Databricks調査技法**: [[02_Databricks_Investigation_Methods]] 追加
+- ✅ **Snowflake調査手法**: [[03_Snowflake_Investigation_Methods]] 追加
+- ✅ **高度なアーキテクチャパターン**: [[04_Advanced_Data_Architecture_Patterns]] 追加
 - ✅ **Best Practices統括ガイド**: ファイル間の関係性・学習ルート明確化
 - ✅ **AI統合実装ガイド**: Databricks Mosaic AI、Snowflake Cortex AI の詳細実装
 - ✅ **2025年最新認定情報**: Unity Catalog OSS、Generation 2 対応
