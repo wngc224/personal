@@ -1,0 +1,207 @@
+name: "📊 KPI Auto Update"
+
+on:
+  schedule:
+    # JST 24:00 (UTC 15:00) に実行
+    - cron: '0 15 * * *'
+  # 手動実行も可能
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: 'Collection targets (comma-separated: databricks,snowflake,vault)'
+        required: false
+        default: 'databricks,snowflake,vault'
+      force_update:
+        description: 'Force update even if no changes'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  collect-kpis:
+    name: "📈 Collect & Update KPIs"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    permissions:
+      contents: write
+      actions: write
+    
+    steps:
+      - name: "📥 Checkout repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: "📦 Install dependencies"
+        run: |
+          pip install --upgrade pip
+          pip install pyyaml requests snowflake-connector-python
+          
+      - name: "🔧 Setup collection targets"
+        id: setup
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TARGETS="${{ github.event.inputs.targets }}"
+            FORCE_UPDATE="${{ github.event.inputs.force_update }}"
+          else
+            TARGETS="databricks,snowflake,vault"
+            FORCE_UPDATE="false"
+          fi
+          
+          echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
+          echo "force_update=${FORCE_UPDATE}" >> $GITHUB_OUTPUT
+          echo "Collection targets: ${TARGETS}"
+      
+      - name: "📊 Collect External API Data"
+        env:
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          DATABRICKS_WORKSPACE_URL: ${{ secrets.DATABRICKS_WORKSPACE_URL }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+        run: |
+          # ログディレクトリ作成
+          mkdir -p knowledge-vault/_metrics/logs
+          
+          # データ収集実行
+          IFS=',' read -ra TARGETS_ARRAY <<< "${{ steps.setup.outputs.targets }}"
+          python scripts/collectors/external-apis.py "${TARGETS_ARRAY[@]}"
+          
+          # 実行結果の確認
+          if [ -f knowledge-vault/_metrics/logs/collector.log ]; then
+            echo "📊 Collection Results:"
+            tail -10 knowledge-vault/_metrics/logs/collector.log
+          fi
+      
+      - name: "🗓️ Create Historical Snapshot"
+        if: github.event_name == 'schedule' || steps.setup.outputs.force_update == 'true'
+        run: |
+          # 週次スナップショット（日曜日のみ）
+          if [ "$(date +%u)" = "7" ] || [ "${{ steps.setup.outputs.force_update }}" = "true" ]; then
+            TIMESTAMP=$(date +%Y%m%d)
+            mkdir -p knowledge-vault/_metrics/historical
+            
+            # 現在データのスナップショット作成
+            cp knowledge-vault/_metrics/data/current-values.yaml \
+               knowledge-vault/_metrics/historical/${TIMESTAMP}-snapshot.yaml
+            
+            echo "📸 Weekly snapshot created: ${TIMESTAMP}-snapshot.yaml"
+          fi
+      
+      - name: "🧹 Cleanup Old Snapshots"
+        run: |
+          # 90日より古いスナップショットを削除
+          find knowledge-vault/_metrics/historical -name "*-snapshot.yaml" -type f -mtime +90 -delete
+          
+          # ログファイルのローテーション（1MB以上で削除）
+          if [ -f knowledge-vault/_metrics/logs/collector.log ] && [ $(stat -f%z knowledge-vault/_metrics/logs/collector.log 2>/dev/null || stat -c%s knowledge-vault/_metrics/logs/collector.log) -gt 1048576 ]; then
+            mv knowledge-vault/_metrics/logs/collector.log knowledge-vault/_metrics/logs/collector.log.old
+            touch knowledge-vault/_metrics/logs/collector.log
+          fi
+      
+      - name: "🔍 Check for changes"
+        id: changes
+        run: |
+          # Git変更の確認
+          if git diff --quiet knowledge-vault/_metrics/; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No changes detected in metrics data"
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "✅ Changes detected in metrics data"
+            git diff --stat knowledge-vault/_metrics/
+          fi
+      
+      - name: "💾 Commit and Push Updates"
+        if: steps.changes.outputs.changes == 'true' || steps.setup.outputs.force_update == 'true'
+        run: |
+          # Git設定
+          git config --global user.name "KPI Bot"
+          git config --global user.email "kpi-bot@github-actions"
+          
+          # 変更をステージング
+          git add knowledge-vault/_metrics/
+          
+          # コミットメッセージの作成
+          COMMIT_MSG="📊 KPI自動更新: $(date '+%Y-%m-%d %H:%M')"
+          
+          if [ -f knowledge-vault/_metrics/logs/collector.log ]; then
+            # 収集結果をコミットメッセージに追加
+            echo "" >> /tmp/commit_msg
+            echo "収集結果:" >> /tmp/commit_msg
+            grep -E "(成功|エラー|警告)" knowledge-vault/_metrics/logs/collector.log | tail -5 >> /tmp/commit_msg
+            
+            COMMIT_MSG="${COMMIT_MSG}$(cat /tmp/commit_msg)"
+          fi
+          
+          # コミット
+          git commit -m "${COMMIT_MSG}"
+          
+          # プッシュ
+          git push origin main
+          
+          echo "✅ KPI data updated and pushed to repository"
+      
+      - name: "📈 Generate Summary Report"
+        if: always()
+        run: |
+          echo "## 📊 KPI Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "**Date**: $(date '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "**Targets**: ${{ steps.setup.outputs.targets }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Changes**: ${{ steps.changes.outputs.changes }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f knowledge-vault/_metrics/logs/collector.log ]; then
+            echo "### 📋 Collection Log" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -10 knowledge-vault/_metrics/logs/collector.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Quick Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [📊 Main Dashboard](../blob/main/knowledge-vault/_metrics/dashboards/main-dashboard.md)" >> $GITHUB_STEP_SUMMARY
+          echo "- [⚙️ Configuration](../blob/main/knowledge-vault/_metrics/config/kpi-definitions.yaml)" >> $GITHUB_STEP_SUMMARY
+          echo "- [📁 Historical Data](../tree/main/knowledge-vault/_metrics/historical)" >> $GITHUB_STEP_SUMMARY
+      
+      - name: "⚠️ Failure Notification"
+        if: failure()
+        run: |
+          echo "❌ KPI収集が失敗しました" >> $GITHUB_STEP_SUMMARY
+          echo "詳細はワークフローログを確認してください。" >> $GITHUB_STEP_SUMMARY
+          
+          # 失敗ログをアーティファクトとして保存
+          if [ -f knowledge-vault/_metrics/logs/collector.log ]; then
+            mkdir -p failure-logs
+            cp knowledge-vault/_metrics/logs/collector.log failure-logs/
+          fi
+      
+      - name: "📦 Upload Failure Logs"
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-logs-${{ github.run_id }}
+          path: failure-logs/
+          retention-days: 7
+
+  notify-completion:
+    name: "📬 Notify Completion"
+    runs-on: ubuntu-latest
+    needs: collect-kpis
+    if: always() && github.event_name == 'schedule'
+    
+    steps:
+      - name: "📋 Summary"
+        run: |
+          echo "📊 Daily KPI collection completed"
+          echo "Status: ${{ needs.collect-kpis.result }}"
+          echo "Time: $(date '+%Y-%m-%d %H:%M UTC')" 

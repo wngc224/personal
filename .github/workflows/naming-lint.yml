@@ -1,0 +1,212 @@
+name: "🔍 Naming Convention Lint"
+
+on:
+  pull_request:
+    paths:
+      - 'knowledge-vault/_metrics/**/*.yaml'
+      - 'knowledge-vault/_metrics/**/*.yml'
+      - 'scripts/**/*.py'
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge-vault/_metrics/**/*.yaml'
+      - 'knowledge-vault/_metrics/**/*.yml'
+      - 'scripts/**/*.py'
+  workflow_dispatch:
+
+jobs:
+  naming-lint:
+    name: "📋 Check Naming Conventions"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: "📥 Checkout code"
+        uses: actions/checkout@v4
+        
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: "📦 Install dependencies"
+        run: |
+          pip install pyyaml
+          
+      - name: "🔍 YAML Naming Convention Check"
+        run: |
+          python - << 'EOF'
+          import yaml
+          import re
+          import sys
+          from pathlib import Path
+          
+          # ネーミング規約パターン
+          BOOL_PATTERN = re.compile(r'^(is_|has_|can_|should_|will_)[a-z0-9_]+$')
+          CATEGORY_PATTERN = re.compile(r'^[a-z]+(_[a-z0-9]+)*$')
+          VALUE_PATTERN = re.compile(r'^[a-z0-9]+(_[a-z0-9]+)*(_value)?$')
+          
+          def check_yaml_naming(file_path):
+              """YAML ファイルのネーミング規約チェック"""
+              errors = []
+              
+              try:
+                  with open(file_path, 'r', encoding='utf-8') as f:
+                      data = yaml.safe_load(f)
+                  
+                  def check_dict(obj, path=""):
+                      """辞書を再帰的にチェック"""
+                      if not isinstance(obj, dict):
+                          return
+                      
+                      for key, value in obj.items():
+                          current_path = f"{path}.{key}" if path else key
+                          
+                          # ブール値のチェック
+                          if isinstance(value, bool):
+                              if not BOOL_PATTERN.match(key):
+                                  errors.append(f"❌ Boolean field '{current_path}' should start with 'is_', 'has_', 'can_', etc.")
+                          
+                          # 閾値系の分離チェック
+                          if key == 'alert_threshold':
+                              errors.append(f"⚠️  Field '{current_path}' should be split into 'is_alert_enabled' + 'alert_threshold_value'")
+                          
+                          # collection_method の廃止チェック
+                          if key == 'collection_method':
+                              errors.append(f"🔄 Field '{current_path}' should be replaced with 'is_manual: boolean'")
+                          
+                          # カテゴリ名のチェック
+                          if key == 'category' and isinstance(value, str):
+                              if not CATEGORY_PATTERN.match(value):
+                                  errors.append(f"📝 Category '{current_path}={value}' should use snake_case")
+                          
+                          # 再帰的チェック
+                          if isinstance(value, dict):
+                              check_dict(value, current_path)
+                          elif isinstance(value, list):
+                              for i, item in enumerate(value):
+                                  if isinstance(item, dict):
+                                      check_dict(item, f"{current_path}[{i}]")
+                  
+                  check_dict(data)
+                  
+              except Exception as e:
+                  errors.append(f"💥 Error parsing {file_path}: {e}")
+              
+              return errors
+          
+          # メトリクス設定ファイルのチェック
+          total_errors = 0
+          yaml_files = [
+              "knowledge-vault/_metrics/config/kpi-definitions.yaml",
+              "knowledge-vault/_metrics/data/current-values.yaml"
+          ]
+          
+          for yaml_file in yaml_files:
+              if Path(yaml_file).exists():
+                  print(f"\n📋 Checking {yaml_file}")
+                  errors = check_yaml_naming(yaml_file)
+                  
+                  if errors:
+                      print(f"❌ Found {len(errors)} naming issues:")
+                      for error in errors:
+                          print(f"  {error}")
+                      total_errors += len(errors)
+                  else:
+                      print(f"✅ Naming conventions OK")
+          
+          # 結果サマリー
+          print(f"\n📊 Summary: {total_errors} total naming issues found")
+          
+          if total_errors > 0:
+              print("\n💡 Naming Convention Guide:")
+              print("  • Boolean fields: is_enabled, has_permission, can_execute")
+              print("  • Categories: platform, development, learning, business")  
+              print("  • Thresholds: is_alert_enabled + alert_threshold_value")
+              print("  • Collection: is_manual (boolean) instead of collection_method")
+              sys.exit(1)
+          
+          print("🎉 All naming conventions passed!")
+          EOF
+          
+      - name: "🐍 Python Variable Naming Check"
+        run: |
+          python - << 'EOF'
+          import re
+          import sys
+          from pathlib import Path
+          
+          # Python変数のパターン
+          BOOL_VAR_PATTERN = re.compile(r'(is_|has_|can_|should_)\w+')
+          COLLECTION_METHOD_PATTERN = re.compile(r'collection_method.*==.*["\']manual["\']')
+          
+          def check_python_naming(file_path):
+              """Pythonファイルのネーミング規約チェック"""
+              errors = []
+              
+              try:
+                  with open(file_path, 'r', encoding='utf-8') as f:
+                      lines = f.readlines()
+                  
+                  for line_num, line in enumerate(lines, 1):
+                      # collection_method の使用チェック
+                      if COLLECTION_METHOD_PATTERN.search(line):
+                          errors.append(f"Line {line_num}: Use 'is_manual' instead of 'collection_method'")
+                      
+                      # health_status チェック
+                      if 'health_status' in line and '=' in line:
+                          errors.append(f"Line {line_num}: Use 'is_healthy' + 'status_code' instead of 'health_status'")
+                  
+              except Exception as e:
+                  errors.append(f"Error parsing {file_path}: {e}")
+              
+              return errors
+          
+          # Pythonファイルのチェック
+          total_errors = 0
+          python_files = list(Path("scripts").glob("**/*.py"))
+          
+          for py_file in python_files:
+              print(f"\n🐍 Checking {py_file}")
+              errors = check_python_naming(py_file)
+              
+              if errors:
+                  print(f"❌ Found {len(errors)} issues:")
+                  for error in errors:
+                      print(f"  {error}")
+                  total_errors += len(errors)
+              else:
+                  print("✅ Python naming OK")
+          
+          if total_errors > 0:
+              print(f"\n💡 Fix these Python naming issues for consistency")
+              sys.exit(1)
+          
+          print("🎉 Python naming conventions passed!")
+          EOF
+          
+      - name: "📈 Generate Naming Report"
+        if: always()
+        run: |
+          echo "## 🔍 Naming Convention Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "**Date**: $(date '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ $? -eq 0 ]; then
+            echo "✅ **All naming conventions passed!**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Naming issues found**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 💡 Quick Fix Guide" >> $GITHUB_STEP_SUMMARY
+            echo "- Boolean fields: \`is_enabled\`, \`has_permission\`, \`can_execute\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Thresholds: \`is_alert_enabled + alert_threshold_value\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Collection: \`is_manual: true/false\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Health: \`is_healthy + status_code\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Files Checked" >> $GITHUB_STEP_SUMMARY
+          echo "- \`knowledge-vault/_metrics/config/kpi-definitions.yaml\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`knowledge-vault/_metrics/data/current-values.yaml\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`scripts/**/*.py\`" >> $GITHUB_STEP_SUMMARY 

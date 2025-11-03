@@ -1,0 +1,97 @@
+# Current KPI Values
+# Auto-updated by collection scripts and manual inputs
+
+meta:
+  last_updated: "2025-06-21T00:00:00Z"
+  version: "1.0.0"
+
+# システム情報（最優先）
+system:
+  is_healthy: true
+  status_code: "healthy"
+  status_message: "All data sources connected"
+  last_backup: "2025-06-21T00:00:00Z"
+  is_data_integrity_verified: true
+  
+# Platform KPIs
+platform:
+  databricks_jobs:
+    value: 8
+    last_updated: "2025-06-21T14:25:00Z"
+    collection_method: "api"
+    status: "active"
+    
+  snowflake_credits:
+    value: 750
+    last_updated: "2025-06-21T14:25:00Z"
+    collection_method: "api"
+    status: "active"
+
+# Development KPIs
+development:
+  batch_documentation:
+    total: 128
+    documented: 42
+    completion_rate: 0.328
+    last_updated: "2025-06-21T14:20:00Z"
+    collection_method: "manual"
+    status: "active"
+    
+  incidents_resolved:
+    opened: 5
+    closed: 4
+    resolution_rate: 0.8
+    last_updated: "2025-06-21T14:15:00Z"
+    collection_method: "manual"
+    status: "active"
+    
+  test_pass_rate:
+    value: 0.95
+    last_updated: "2025-06-21T14:10:00Z"
+    collection_method: "api"
+    status: "active"
+
+# Learning KPIs
+learning:
+  study_hours:
+    monthly: 32
+    daily_average: 1.6
+    last_updated: "2025-06-21T14:05:00Z"
+    collection_method: "manual"
+    status: "active"
+    
+  certifications:
+    total: 3
+    in_progress: 1
+    last_updated: "2025-06-21T14:00:00Z"
+    collection_method: "manual"
+    status: "active"
+    
+  vocabulary_learned:
+    total: 250
+    monthly: 85
+    last_updated: "2025-06-21T13:55:00Z"
+    collection_method: "manual"
+    status: "active"
+
+# Business KPIs
+business:
+  decisions_made:
+    total: 15
+    monthly: 8
+    last_updated: "2025-06-21T13:50:00Z"
+    collection_method: "auto"
+    status: "active"
+    
+  pattern_applications:
+    total: 12
+    monthly: 5
+    last_updated: "2025-06-21T13:45:00Z"
+    collection_method: "auto"
+    status: "active"
+
+# 📝 フォールバック用最小構造（エラー時に使用）
+# system:
+#   is_healthy: false
+#   status_code: "unknown"
+#   status_message: "Status unavailable" 

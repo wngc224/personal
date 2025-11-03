@@ -1,0 +1,45 @@
+# 統合KPIダッシュボード基盤 - Python依存関係
+# Knowledge Vault Integrated KPI Dashboard Platform
+
+# YAML処理
+pyyaml>=6.0
+
+# HTTP Request処理
+requests>=2.31.0
+
+# Snowflake接続
+snowflake-connector-python>=3.7.0
+
+# データ処理・分析
+pandas>=2.1.0
+numpy>=1.24.0
+
+# 日時処理
+python-dateutil>=2.8.2
+
+# ログ処理
+structlog>=23.2.0
+
+# 型安全性・バリデーション
+pydantic>=2.5.0
+typing-extensions>=4.7.0
+
+# 開発・テスト用（オプション）
+pytest>=7.4.0
+pytest-cov>=4.1.0
+black>=23.7.0
+flake8>=6.0.0
+mypy>=1.5.0
+
+# 追加のデータソース連携（オプション）
+# GitHub API
+PyGithub>=1.59.0
+
+# Slack API（通知用）
+slack-sdk>=3.21.0
+
+# 暗号化・セキュリティ
+cryptography>=41.0.0
+
+# 環境変数管理
+python-dotenv>=1.0.0 

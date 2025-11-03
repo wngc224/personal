@@ -1,0 +1,239 @@
+# KPI Dashboard Configuration
+# 拡張可能・構造的なKPI定義設定
+
+meta:
+  version: "1.0.0"
+  created: "2025-06-21"
+  description: "統合KPIダッシュボード設定"
+  
+# KPIカテゴリ定義
+categories:
+  platform:
+    name: "🚀 Platform"
+    description: "データプラットフォーム関連メトリクス"
+    color: "#4CAF50"
+    icon: "🚀"
+    
+  development:
+    name: "📦 Development"
+    description: "開発・実装関連メトリクス"
+    color: "#2196F3"
+    icon: "📦"
+    
+  learning:
+    name: "🎓 Learning"
+    description: "学習・スキル向上メトリクス"
+    color: "#FF9800"
+    icon: "🎓"
+    
+  business:
+    name: "💼 Business"
+    description: "ビジネス・意思決定メトリクス"
+    color: "#9C27B0"
+    icon: "💼"
+
+# KPI定義
+kpis:
+  # Platform KPIs
+  databricks_jobs:
+    category: "platform"
+    name: "Databricks Jobs"
+    description: "Databricks環境のアクティブジョブ数"
+    type: "count"
+    unit: "jobs"
+    is_manual: false
+    is_alert_enabled: true
+    alert_threshold_value: 5
+    alert_threshold_unit: "jobs"
+    api_config:
+      source: "databricks"
+      endpoint: "/api/2.1/jobs/list"
+      field_path: "jobs.length"
+    target_daily: 10
+    target_monthly: 300
+    
+  snowflake_credits:
+    category: "platform"
+    name: "Snowflake Credits"
+    description: "Snowflake日次クレジット消費量"
+    type: "count"
+    unit: "credits"
+    is_manual: false
+    is_alert_enabled: true
+    alert_threshold_value: 100
+    alert_threshold_unit: "credits"
+    api_config:
+      source: "snowflake"
+      query: "select sum(credits_used_compute) from snowflake.account_usage.warehouse_metering_history where start_time::date=current_date"
+    target_daily: 50
+    
+  # Development KPIs
+  batch_documentation:
+    category: "development"
+    name: "Batch Documentation"
+    description: "バッチ処理仕様書の文書化進捗"
+    type: "progress"
+    unit: "specs"
+    is_manual: true
+    is_alert_enabled: false
+    components:
+      total: 128
+      documented: 0
+    target_completion: 0.8
+    
+  incidents_resolved:
+    category: "development"
+    name: "Incidents Resolved"
+    description: "月次インシデント解決率"
+    type: "rate"
+    unit: "incidents"
+    is_manual: true
+    is_alert_enabled: true
+    alert_threshold_value: 0.8
+    alert_threshold_unit: "ratio"
+    components:
+      opened: 0
+      closed: 0
+    target_resolution_rate: 0.9
+    
+  test_pass_rate:
+    category: "development"
+    name: "Test Pass Rate"
+    description: "テスト合格率"
+    type: "percentage"
+    unit: "%"
+    is_manual: false
+    is_alert_enabled: true
+    alert_threshold_value: 0.9
+    alert_threshold_unit: "percentage"
+    target_rate: 0.95
+    
+  # Learning KPIs
+  study_hours:
+    category: "learning"
+    name: "Study Hours"
+    description: "月次学習時間"
+    type: "count"
+    unit: "hours"
+    is_manual: true
+    is_alert_enabled: false
+    target_monthly: 40
+    
+  certifications:
+    category: "learning"
+    name: "Certifications"
+    description: "取得資格数"
+    type: "count"
+    unit: "certs"
+    is_manual: true
+    is_alert_enabled: false
+    target_yearly: 2
+    
+  vocabulary_learned:
+    category: "learning"
+    name: "Vocabulary Learned"
+    description: "習得語彙数"
+    type: "count"
+    unit: "words"
+    is_manual: true
+    is_alert_enabled: false
+    target_monthly: 100
+    
+  # Business KPIs
+  decisions_made:
+    category: "business"
+    name: "Decisions Made"
+    description: "記録された意思決定数"
+    type: "count"
+    unit: "decisions"
+    is_manual: false
+    is_alert_enabled: false
+    source_query: "LIST FROM #decision-log"
+    target_monthly: 10
+    
+  pattern_applications:
+    category: "business"
+    name: "Pattern Applications"
+    description: "設計パターン適用数"
+    type: "count"
+    unit: "applications"
+    is_manual: false
+    is_alert_enabled: false
+    source_query: "LIST FROM #pattern/"
+    target_monthly: 5
+
+# ダッシュボード構成
+dashboard_layouts:
+  main:
+    name: "メインダッシュボード"
+    sections:
+      - name: "Platform Health"
+        kpis: ["databricks_jobs", "snowflake_credits"]
+        layout: "row"
+        
+      - name: "Development Progress"
+        kpis: ["batch_documentation", "incidents_resolved", "test_pass_rate"]
+        layout: "grid"
+        
+      - name: "Learning & Growth"
+        kpis: ["study_hours", "certifications", "vocabulary_learned"]
+        layout: "row"
+        
+      - name: "Knowledge Management"
+        kpis: ["decisions_made", "pattern_applications"]
+        layout: "row"
+        
+  weekly_review:
+    name: "週次レビュー"
+    sections:
+      - name: "Trends"
+        type: "chart"
+        timeframe: "7d"
+        
+      - name: "Achievements"
+        type: "milestones"
+        
+      - name: "Action Items"
+        type: "todo"
+
+# 自動化設定
+automation:
+  is_enabled: true
+  is_threshold_alerts: true
+  is_email_notifications: false
+  collection_schedule:
+    api_updates: "0 15 * * *"  # JST 24:00
+    weekly_snapshot: "0 12 * * 0"  # 日曜 21:00
+    monthly_report: "0 9 1 * *"   # 月初 18:00
+    
+  notifications:
+    is_threshold_alerts: true
+    is_daily_summary: true
+    is_weekly_report: true
+    
+  backup:
+    is_enabled: true
+    retention_days: 90
+    is_historical_compression: true
+
+# UI/UX設定
+ui_config:
+  theme:
+    primary_color: "#1976D2"
+    accent_color: "#FFC107"
+    success_color: "#4CAF50"
+    warning_color: "#FF9800"
+    error_color: "#F44336"
+    
+  animations:
+    enabled: true
+    duration: 300
+    
+  responsive:
+    mobile_breakpoint: 768
+    tablet_breakpoint: 1024
+    
+  accessibility:
+    high_contrast: false
+    screen_reader_support: true
+    keyboard_navigation: true 

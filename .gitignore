@@ -26,4 +26,16 @@ Thumbs.db
 
 # 機密情報（必要に応じて追加）
 **/private/
-**/confidential/ 
+**/confidential/
+
+# Node.js
+node_modules/
+package-lock.json
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Build outputs
+dist/
+build/ 

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 統合KPIダッシュボード - Working Version</title>
+    
+    <!-- CSS読み込み -->
+    <link rel="stylesheet" href="../../_css/dashboard.css">
+    
+    <!-- YAML パーサー -->
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    
+    <style>
+        /* ページ固有スタイル */
+        body {
+            font-family: var(--font-family, 'Inter, system-ui, sans-serif');
+            margin: 0;
+            padding: 20px;
+            background: var(--color-bg-secondary, #f8f9fa);
+            color: var(--color-text-primary, #212529);
+            line-height: 1.6;
+        }
+        
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 5px 0;
+            opacity: 0.9;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary, #6c757d);
+        }
+        
+        .loading::after {
+            content: "";
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(238, 90, 36, 0.3);
+        }
+        
+        .error h3 {
+            margin: 0 0 10px 0;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .status-healthy {
+            background: rgba(76, 175, 80, 0.1);
+            color: #2e7d32;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+        
+        .status-warning {
+            background: rgba(255, 152, 0, 0.1);
+            color: #f57c00;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+        
+        .status-error {
+            background: rgba(244, 67, 54, 0.1);
+            color: #d32f2f;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .header h1 { font-size: 2em; }
+            .controls { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>📊 統合KPIダッシュボード</h1>
+            <p><strong>リアルタイムメトリクス監視 & 分析</strong></p>
+            <p>最終更新: <span id="current-time"></span></p>
+            <div id="system-status"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="reloadDashboard()">
+                🔄 ダッシュボード更新
+            </button>
+            <button class="btn btn-secondary" onclick="toggleTheme()">
+                🌙 テーマ切替
+            </button>
+            <a href="../config/kpi-definitions.yaml" class="btn btn-secondary" target="_blank">
+                ⚙️ 設定確認
+            </a>
+        </div>
+        
+        <div id="dashboard-content" class="loading">
+            <p>🔄 ダッシュボードを読み込み中...</p>
+        </div>
+    </div>
+
+    <script>
+        // グローバル変数
+        let dashboardData = null;
+        let dashboardConfig = null;
+        
+        // 現在時刻表示
+        function updateCurrentTime() {
+            document.getElementById('current-time').textContent = 
+                new Date().toLocaleString('ja-JP', {
+                    year: 'numeric',
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+        }
+
+        // YAML データの読み込み
+        async function loadYamlFile(path) {
+            try {
+                const response = await fetch(path);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const text = await response.text();
+                return jsyaml.load(text);
+            } catch (error) {
+                console.error(`Failed to load ${path}:`, error);
+                throw error;
+            }
+        }
+
+        // エラー表示
+        function showError(message, details = '') {
+            const content = document.getElementById('dashboard-content');
+            content.innerHTML = `
+                <div class="error">
+                    <h3>⚠️ エラーが発生しました</h3>
+                    <p><strong>${message}</strong></p>
+                    ${details ? `<p>詳細: ${details}</p>` : ''}
+                    <p><strong>解決策:</strong></p>
+                    <ul>
+                        <li>ブラウザを更新してください</li>
+                        <li>設定ファイルが正しく配置されているか確認してください</li>
+                        <li>ローカルサーバーが起動しているか確認してください</li>
+                    </ul>
+                    <button class="btn btn-primary" onclick="reloadDashboard()" style="margin-top: 15px;">
+                        🔄 再試行
+                    </button>
+                </div>
+            `;
+        }
+
+        // システムステータス表示
+        function updateSystemStatus(data) {
+            const statusContainer = document.getElementById('system-status');
+            const isHealthy = data.system?.is_healthy || false;
+            const statusCode = data.system?.status_code || 'unknown';
+            const statusMessage = data.system?.status_message || 'Status unavailable';
+            
+            const statusClass = isHealthy ? 'status-healthy' : 
+                               statusCode === 'warning' ? 'status-warning' : 'status-error';
+            const statusIcon = isHealthy ? '💚' : statusCode === 'warning' ? '⚠️' : '🔴';
+            
+            statusContainer.innerHTML = `
+                <div class="status-indicator ${statusClass}">
+                    ${statusIcon} ${statusCode.toUpperCase()}: ${statusMessage}
+                </div>
+            `;
+        }
+
+        // KPIカード生成
+        function generateKpiCard(kpiId, kpiConfig, kpiData, categoryInfo) {
+            if (!kpiData) return '';
+            
+            // 値の表示形式を決定
+            let displayValue, unit, progress = null;
+            
+            switch (kpiConfig.type) {
+                case 'progress':
+                    const completion = kpiData.completion_rate || 
+                                     (kpiData.documented && kpiData.total ? 
+                                      kpiData.documented / kpiData.total : 0);
+                    displayValue = `${kpiData.documented || 0}/${kpiData.total || 0}`;
+                    unit = kpiConfig.unit;
+                    progress = Math.round(completion * 100);
+                    break;
+                    
+                case 'rate':
+                case 'percentage':
+                    const rawValue = kpiData.resolution_rate || 
+                                    (kpiData.closed && kpiData.opened ? 
+                                     kpiData.closed / (kpiData.opened + kpiData.closed) : 0) || 
+                                    kpiData.value || 0;
+                    displayValue = Math.round(rawValue * 100);
+                    unit = '%';
+                    break;
+                    
+                default:
+                    displayValue = kpiData.value || kpiData.total || kpiData.monthly || 0;
+                    unit = kpiConfig.unit;
+            }
+            
+            // 最終更新時刻
+            let lastUpdated = '未更新';
+            try {
+                if (kpiData.last_updated) {
+                    const updateDate = new Date(kpiData.last_updated);
+                    lastUpdated = updateDate.toLocaleString('ja-JP', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+            } catch (dateError) {
+                lastUpdated = 'Invalid Date';
+            }
+            
+            // ターゲット情報
+            let targetInfo = '';
+            if (kpiConfig.target_daily) {
+                targetInfo = `Target: ${kpiConfig.target_daily} ${unit}/day`;
+            } else if (kpiConfig.target_monthly) {
+                targetInfo = `Target: ${kpiConfig.target_monthly} ${unit}/month`;
+            } else if (kpiConfig.target_completion) {
+                targetInfo = `Target: ${Math.round(kpiConfig.target_completion * 100)}%`;
+            }
+            
+            // ステータスクラス
+            const statusClass = kpiData.status === 'error' ? 'is-error' : '';
+            const loadingClass = kpiData.status === 'pending' ? 'is-loading' : '';
+            
+            return `
+                <div class="kpi-card ${statusClass} ${loadingClass}" 
+                     data-category="${kpiConfig.category}"
+                     tabindex="0" role="article" 
+                     aria-label="${kpiConfig.name} KPI カード">
+                    <div class="kpi-card__header">
+                        <span class="kpi-card__title">${kpiConfig.name}</span>
+                        <div class="kpi-card__status" aria-label="ステータス: アクティブ"></div>
+                    </div>
+                    <div class="kpi-card__value ${statusClass}" aria-label="現在値: ${displayValue}${unit}">
+                        ${displayValue}<span class="kpi-card__unit">${unit}</span>
+                    </div>
+                    ${progress !== null ? `
+                        <div class="progress-bar" role="progressbar" 
+                             aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"
+                             aria-label="進捗: ${progress}%">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                    ` : ''}
+                    <div class="kpi-card__meta">
+                        <span aria-label="最終更新: ${lastUpdated}">${lastUpdated}</span>
+                        ${targetInfo ? `<span class="kpi-card__target" aria-label="目標: ${targetInfo}">${targetInfo}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ダッシュボード生成
+        async function generateDashboard() {
+            const content = document.getElementById('dashboard-content');
+            
+            try {
+                // 設定とデータを読み込み
+                dashboardConfig = await loadYamlFile('../config/kpi-definitions.yaml');
+                dashboardData = await loadYamlFile('../data/current-values.yaml');
+                
+                // システムステータス更新
+                updateSystemStatus(dashboardData);
+                
+                let html = '';
+                
+                // 各セクションを生成
+                const layout = dashboardConfig.dashboard_layouts.main;
+                
+                for (const section of layout.sections) {
+                    // セクション情報を取得
+                    let categoryInfo = { icon: '📊', color: '#1976D2', name: 'Default' };
+                    for (const kpiId of section.kpis) {
+                        const kpiConfig = dashboardConfig.kpis[kpiId];
+                        if (kpiConfig?.category && dashboardConfig.categories[kpiConfig.category]) {
+                            categoryInfo = dashboardConfig.categories[kpiConfig.category];
+                            break;
+                        }
+                    }
+                    
+                    html += `<h3>${categoryInfo.icon} ${section.name}</h3>`;
+                    
+                    // KPIカードコンテナ
+                    const containerClass = section.layout === 'grid' ? 'kpi-grid' : 'kpi-row';
+                    html += `<div class="kpi-section"><div class="${containerClass}">`;
+                    
+                    for (const kpiId of section.kpis) {
+                        const kpiConfig = dashboardConfig.kpis[kpiId];
+                        if (!kpiConfig) continue;
+                        
+                        const categoryKey = kpiConfig.category;
+                        const categoryData = dashboardData[categoryKey];
+                        const kpiData = categoryData?.[kpiId];
+                        
+                        if (kpiData) {
+                            html += generateKpiCard(kpiId, kpiConfig, kpiData, categoryInfo);
+                        }
+                    }
+                    
+                    html += '</div></div>';
+                }
+                
+                // メタ情報
+                html += `
+                    <div class="kpi-section" style="margin-top: 40px;">
+                        <h3>📈 ダッシュボード情報</h3>
+                        <div class="kpi-row">
+                            <div class="kpi-card">
+                                <div class="kpi-card__title">📊 データ状況</div>
+                                <div style="margin: 15px 0;">
+                                    <p>✅ 設定ファイル: 読み込み済み</p>
+                                    <p>✅ データファイル: 読み込み済み</p>
+                                    <p>📈 KPI数: ${Object.keys(dashboardConfig.kpis).length}個</p>
+                                    <p>🏷️ カテゴリ数: ${Object.keys(dashboardConfig.categories).length}個</p>
+                                </div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-card__title">🚀 パフォーマンス</div>
+                                <div style="margin: 15px 0;">
+                                    <p>⚡ 読み込み時間: ${performance.now().toFixed(0)}ms</p>
+                                    <p>🌐 ブラウザ: ${navigator.userAgent.includes('Chrome') ? 'Chrome' : 
+                                                      navigator.userAgent.includes('Firefox') ? 'Firefox' : 
+                                                      navigator.userAgent.includes('Safari') ? 'Safari' : 'Other'}</p>
+                                    <p>📱 画面サイズ: ${window.innerWidth}×${window.innerHeight}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                content.innerHTML = html;
+                
+                // アクセシビリティの強化
+                document.querySelectorAll('.kpi-card').forEach(card => {
+                    card.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            card.click();
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                showError('ダッシュボードの読み込みに失敗しました', error.message);
+            }
+        }
+        
+        // ダッシュボード更新
+        function reloadDashboard() {
+            updateCurrentTime();
+            generateDashboard();
+        }
+        
+        // テーマ切り替え
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('dashboard-theme', newTheme);
+        }
+        
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            // テーマ復元
+            const savedTheme = localStorage.getItem('dashboard-theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            
+            // 時刻更新
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 60000); // 1分ごと
+            
+            // ダッシュボード生成
+            generateDashboard();
+            
+            // 定期更新（5分ごと）
+            setInterval(reloadDashboard, 5 * 60 * 1000);
+        });
+        
+        // エラーハンドリング
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e.error);
+            showError('予期しないエラーが発生しました', e.error?.message || 'Unknown error');
+        });
+        
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            showError('非同期処理でエラーが発生しました', e.reason?.message || 'Promise rejection');
+        });
+    </script>
+</body>
+</html> 

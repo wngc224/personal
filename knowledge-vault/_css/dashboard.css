@@ -1,0 +1,488 @@
+/* 📊 統合KPIダッシュボード - メインスタイルシート */
+/* 拡張可能・保守性・アクセシビリティを重視した設計 */
+
+/* === CSS部分ファイル読み込み（将来拡張用） === */
+@import 'partials/_variables.css';
+
+/* === CSS変数定義（フォールバック用） === */
+:root {
+  /* カラーパレット */
+  --color-primary: #667eea;
+  --color-secondary: #764ba2;
+  --color-success: #4CAF50;
+  --color-warning: #FF9800;
+  --color-error: #F44336;
+  --color-info: #2196F3;
+  
+  /* テキストカラー */
+  --color-text-primary: #212529;
+  --color-text-secondary: #6c757d;
+  --color-text-accent: #495057;
+  --color-text-light: #868e96;
+  
+  /* 背景カラー */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8f9fa;
+  --color-bg-accent: #e9ecef;
+  --color-bg-hover: #f1f3f4;
+  
+  /* スペーシング */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+  
+  /* フォント */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-xxl: 1.5rem;
+  
+  /* 境界線 */
+  --border-width: 1px;
+  --border-color: #dee2e6;
+  --border-hover: #adb5bd;
+  
+  /* 角丸 */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  
+  /* 影 */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+  
+  /* トランジション */
+  --transition-fast: 0.15s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+/* === ハイコントラストモード対応 === */
+@media (prefers-contrast: high) {
+  :root {
+    --color-text-primary: #000000;
+    --color-text-secondary: #333333;
+    --shadow-sm: 0 2px 10px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 15px rgba(0,0,0,0.3);
+  }
+}
+
+/* === ダークモード対応 === */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text-primary: #f8f9fa;
+    --color-text-secondary: #adb5bd;
+    --color-bg-primary: #212529;
+    --color-bg-secondary: #343a40;
+    --color-bg-tertiary: #495057;
+  }
+}
+
+/* === 基本レイアウト === */
+.kpi-dashboard {
+  font-family: var(--font-family);
+  line-height: 1.5;
+}
+
+.kpi-section {
+  margin-bottom: var(--spacing-xl);
+  contain: layout style;
+}
+
+.kpi-section h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin: 0 0 var(--spacing-lg) 0;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* === グリッドレイアウト === */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  contain: layout;
+}
+
+.kpi-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* === KPIカード === */
+.kpi-card {
+  background: linear-gradient(135deg, 
+    var(--color-bg-primary, #ffffff) 0%, 
+    color-mix(in srgb, var(--color-bg-primary, #ffffff) 95%, var(--color-accent, #007acc) 5%) 100%);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  transition: all var(--transition-medium);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+  contain: layout style;
+  
+  /* アクセシビリティ強化 */
+  tabindex: 0;
+  role: article;
+  outline: none;
+  cursor: pointer;
+}
+
+.kpi-card:hover,
+.kpi-card:focus {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-hover);
+}
+
+.kpi-card:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* === カード要素 === */
+.kpi-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.kpi-card__title {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+.kpi-card__status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-success);
+  flex-shrink: 0;
+}
+
+.kpi-card__value {
+  font-size: var(--font-size-xxl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.2;
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-xs);
+}
+
+.kpi-card__unit {
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.kpi-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  gap: var(--spacing-sm);
+}
+
+.kpi-card__target {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg-accent);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+/* === プログレスバー === */
+.progress-bar {
+  height: 8px;
+  background: var(--color-bg-accent);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin: var(--spacing-md) 0;
+  position: relative;
+  
+  /* アクセシビリティ */
+  role: progressbar;
+  aria-valuemin: 0;
+  aria-valuemax: 100;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-medium);
+  position: relative;
+  
+  /* パフォーマンス最適化 */
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: progress-shine 2s ease-in-out infinite;
+}
+
+@keyframes progress-shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* === 状態クラス === */
+.kpi-card.is-loading {
+  opacity: 0.7;
+  position: relative;
+}
+
+.kpi-card.is-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--color-accent, #007acc);
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.kpi-card.is-error {
+  border-left-color: var(--color-red, #dc3545) !important;
+  background: color-mix(in srgb, var(--color-bg-primary, #ffffff) 95%, var(--color-red, #dc3545) 5%);
+}
+
+.kpi-card.is-ok {
+  border-left-color: var(--color-green, #28a745) !important;
+}
+
+/* === カテゴリ別スタイル === */
+.kpi-card[data-category] {
+  border-left-color: var(--color-primary, #007acc);
+}
+
+.kpi-card[data-category="platform"] {
+  border-left-color: var(--color-platform, #4CAF50);
+}
+
+.kpi-card[data-category="development"] {
+  border-left-color: var(--color-development, #2196F3);
+}
+
+.kpi-card[data-category="learning"] {
+  border-left-color: var(--color-learning, #FF9800);
+}
+
+.kpi-card[data-category="business"] {
+  border-left-color: var(--color-business, #9C27B0);
+}
+
+.kpi-card[data-category="system"] {
+  border-left-color: var(--color-system, #FF5722);
+}
+
+/* === レスポンシブデザイン === */
+@media (max-width: 768px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .kpi-row {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .kpi-card {
+    padding: var(--spacing-md);
+  }
+  
+  .kpi-card__value {
+    font-size: var(--font-size-xl);
+  }
+  
+  .kpi-card__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .kpi-grid {
+    gap: var(--spacing-sm);
+  }
+  
+  .kpi-card {
+    padding: var(--spacing-sm);
+  }
+  
+  .kpi-card__value {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* === プリファードモーション配慮 === */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* === ハイコントラストモード === */
+@media (prefers-contrast: high) {
+  .kpi-card {
+    border-width: 2px;
+    border-color: var(--color-text-primary);
+  }
+  
+  .kpi-card:focus {
+    outline-width: 3px;
+  }
+}
+
+/* === プリントスタイル === */
+@media print {
+  .kpi-card {
+    break-inside: avoid-page;
+    page-break-inside: avoid; /* Safari対応 */
+    margin-bottom: 10px;
+  }
+  
+  .kpi-section {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+}
+
+/* === フォーカス管理 === */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* キーボードナビゲーション用 */
+.kpi-card:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* === is_プレフィックス状態クラス === */
+.kpi-card__value.is-error {
+  color: var(--color-error);
+}
+
+/* 🚨 修正#5: CSS読み込み失敗時のフォールバック */
+.css-fallback .kpi-card {
+  border: 2px solid #ccc !important;
+  background: #f9f9f9 !important;
+  padding: 15px !important;
+  margin: 10px !important;
+  border-radius: 8px !important;
+}
+
+/* 🚨 修正#10: ダークテーマ対応（color-mix使用） */
+.dashboard {
+  background: linear-gradient(135deg, 
+    var(--color-bg-secondary, #f8f9fa) 0%, 
+    color-mix(in srgb, var(--color-bg-secondary, #f8f9fa) 70%, #666 30%) 100%);
+}
+
+/* 🚨 修正#6: 色覚多様性対応（色+パターン+アイコン） */
+.trend-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.trend-indicator.trend-up {
+  color: var(--color-green, #28a745);
+  border-left: 3px solid var(--color-green, #28a745);
+  padding-left: 6px;
+}
+
+.trend-indicator.trend-down {
+  color: var(--color-red, #dc3545);
+  border-left: 3px solid var(--color-red, #dc3545);
+  padding-left: 6px;
+}
+
+.trend-indicator.trend-stable {
+  color: var(--color-gray, #6c757d);
+  border-left: 3px solid var(--color-gray, #6c757d);
+  padding-left: 6px;
+}
+
+/* 既存のhealth-statusを拡張 */
+.health-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  background: color-mix(in srgb, var(--color-bg-primary, #ffffff) 90%, var(--color-green, #28a745) 10%);
+  border-left: 4px solid var(--color-green, #28a745);
+}
+
+.health-status.warning {
+  background: color-mix(in srgb, var(--color-bg-primary, #ffffff) 90%, var(--color-orange, #ff9800) 10%);
+  border-left-color: var(--color-orange, #ff9800);
+}
+
+.health-status.warning::before {
+  content: "⚠️ Warning";
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.health-status:not(.warning)::before {
+  content: "💚 Healthy";
+  font-weight: bold;
+  margin-right: 8px;
+} 
